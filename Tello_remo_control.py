@@ -10,10 +10,6 @@ import imutils
 os.chdir(os.path.dirname(__file__))
 from pygame import mixer
 mixer.init()        #初期化
-# mixer.music.load('./input/forward.wav')
-# mixer.music.play(1)  
-
-
 
 # telloへのアクセス用
 tello_ip = '192.168.10.1'
@@ -55,7 +51,7 @@ thread.start()
 socket.sendto('command'.encode('utf-8'), tello_address)
 
 # 離陸
-# socket.sendto('takeoff'.encode('utf-8'), tello_address)
+socket.sendto('takeoff'.encode('utf-8'), tello_address)
 socket.sendto('speed 50'.encode('utf-8'), tello_address)
 # time.sleep(5)
 # socket.sendto('cw 360'.encode('utf-8'), tello_address)
@@ -69,8 +65,7 @@ socket.sendto('speed 50'.encode('utf-8'), tello_address)
 socket.sendto('streamon'.encode('utf-8'), tello_address)
 udp_video_address = 'udp://@' + VS_UDP_IP + ':' + str(VS_UDP_PORT)
 if cap is None:
-   cap = cv2.VideoCapture(1)
-#    cap = cv2.VideoCapture(udp_video_address)
+    cap = cv2.VideoCapture(udp_video_address)
 if not cap.isOpened():
     cap.open(udp_video_address)
 
@@ -115,7 +110,6 @@ font = cv2.FONT_HERSHEY_SIMPLEX
 i = 0
 while (cap.isOpened()):
     ret, frame = cap.read()
-    frame = cv2.resize(frame, dsize=(960, 720))
     blurred = cv2.GaussianBlur(frame, (11, 11), 0)
     hsv = cv2.cvtColor(blurred, cv2.COLOR_BGR2HSV)
     mask = cv2.inRange(hsv, greenLower, greenUpper)
@@ -132,57 +126,47 @@ while (cap.isOpened()):
         M = cv2.moments(c)
         center = (int(M["m10"] / M["m00"]), int(M["m01"] / M["m00"]))
         # only proceed if the radius meets a minimum size
-        xoffset = int(center[0] - midx/2)
-        xoffset=xoffset
-        yoffset = int(midy/1.5 - center[1])
+        xoffset = int(center[0] - midx)
+        yoffset = int(midy - center[1])
 
         if 450 > xoffset > 100 and -100 < yoffset < 100:
-#            socket.sendto('right 30'.encode('utf-8'), tello_address)
-             mixer.music.load('./input/right.wav')
-             mixer.music.play(1)
-             print("R")             
+            socket.sendto('right 30'.encode('utf-8'), tello_address)
+            mixer.music.load('./input/right.wav')
+            mixer.music.play(1)
         elif -450 < xoffset < -100 and -100 < yoffset < 100:
-#            socket.sendto('left 30'.encode('utf-8'), tello_address)
-             mixer.music.load('./input/left.wav')
-             mixer.music.play(1)
-             print("L")
- 
+            socket.sendto('left 30'.encode('utf-8'), tello_address)
+            mixer.music.load('./input/left.wav')
+            mixer.music.play(1)
         elif -100 < xoffset < 100 and -350 < yoffset < -100:
-#            socket.sendto('up 40'.encode('utf-8'), tello_address)
-             mixer.music.load('./input/up.wav')
-             mixer.music.play(1)
-             print("U") 
+            socket.sendto('down 30'.encode('utf-8'), tello_address)
+            mixer.music.load('./input/down.wav')
+            mixer.music.play(1)
         elif -100 < xoffset < 100 and 100 < yoffset < 350: 
-#            socket.sendto('down 30'.encode('utf-8'), tello_address)
-             mixer.music.load('./input/down.wav')
-             mixer.music.play(1)
-             print("D")            
+            socket.sendto('up 40'.encode('utf-8'), tello_address)
+            mixer.music.load('./input/up.wav')
+            mixer.music.play(1)
         elif -100 < xoffset < 100 and -100 < yoffset < 100 and xradius > 50:
-#            socket.sendto('back 50'.encode('utf-8'), tello_address)
-#             mixer.music.play(1) 
-             print("B")
-#             mixer.music.play(1)
-        elif -100 < xoffset < 100 and -100 < yoffset < 100 and xradius < 40:        
-#            socket.sendto('forward 40'.encode('utf-8'), tello_address)
-             mixer.music.load('./input/forward.wav')
-             mixer.music.play(1)
-             print("F")
-          
-        else:      
+            socket.sendto('back 50'.encode('utf-8'), tello_address)
+            mixer.music.load('./input/back.wav')
+            mixer.music.play(1)
+        elif -100 < xoffset < 100 and -100 < yoffset < 100 and xradius < 20:        
+            socket.sendto('forward 40'.encode('utf-8'), tello_address)
+            mixer.music.load('./input/forward.wav')
+            mixer.music.play(1)
+        else:
             socket.sendto('stop'.encode('utf-8'), tello_address)
 
         if radius > 10:
-          cv2.circle(frame, (int(x), int(y)), int(radius), (0, 255, 255), 2)
-          cv2.circle(frame, center, 5, (0, 0, 255), -1)
+            cv2.circle(frame, (int(x), int(y)), int(radius), (0, 255, 255), 2)
+            cv2.circle(frame, center, 5, (0, 0, 255), -1)
     i = i + 1
     if i % 1 == 0:
         cv2.putText(frame, "X-offset: " + str(xoffset), (10, 100), cv2.FONT_HERSHEY_SIMPLEX, 1.25, (0, 255, 255), 4)
-        cv2.putText(frame, "Y-offset: " + str(yoffset), (10, 150), cv2.FONT_HERSHEY_SIMPLEX, 1.25, (0, 255, 255), 4) 
+        cv2.putText(frame, "Y-offset: " + str(yoffset), (10, 150), cv2.FONT_HERSHEY_SIMPLEX, 1.25, (0, 255, 255), 4)
         cv2.putText(frame, "o-radius: " + str(xradius), (10, 190), cv2.FONT_HERSHEY_SIMPLEX, 1.25, (0, 255, 255), 4)
-        cv2.rectangle(frame, (0, 260), (960, 460), (0, 255, 255), thickness=8, lineType=cv2.LINE_4)
+        cv2.rectangle(frame, (0, 210), (960, 510), (255, 255, 255), thickness=8, lineType=cv2.LINE_4)
         cv2.line(frame, (0, 360), (960, 360), (0, 0, 0), thickness=1, lineType=cv2.LINE_4)
-        cv2.line(frame, (480, 0), (480, 720), (0, 0, 0), thickness=1, lineType=cv2.LINE_4)
-        cv2.rectangle(frame, (380, 0), (580, 720), (255, 255, 255), thickness=8, lineType=cv2.LINE_4)
+        cv2.rectangle(frame, (330, 0), (630, 960), (255, 255, 255), thickness=8, lineType=cv2.LINE_4)
 
         cv2.imshow("Frame", frame)
         video.write(frame)  # escを押したら終了。
