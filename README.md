@@ -1,7 +1,7 @@
 # drone
 Tello が　緑色のボールを追いかけます。
 
-ボール座標認識・・・ボールの位置をTelloがup,down,right,left,forward,backwardに移動し追いかけます。
+ボール座標認識・・・ボールの位置をTelloが up, down, right, left, forward, backwardに移動し追いかけます。
 
 上下、左右、に移動するパラメータはボールの座標です。
 
