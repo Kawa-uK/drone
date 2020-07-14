@@ -14,6 +14,8 @@ If the ball move near the drone go backward with the voice telling 'back'
 
 If the ball move far the drone go forward with the voice telling '前進'
 
+![tello](https://user-images.githubusercontent.com/66853038/87397275-1184e880-c5ef-11ea-81c7-0062fde4281a.gif)
+
 ドローンが緑色のボールを追跡します
 
 ボールの左右、上下、前後の動きに追随します。
